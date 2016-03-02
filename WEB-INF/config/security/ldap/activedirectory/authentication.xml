@@ -1,0 +1,79 @@
+?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="
+	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
+    http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd">
+
+	<!-- ======================== AUTHENTICATION ======================= -->
+	<bean id="authenticationManager"
+		class="org.springframework.security.providers.ProviderManager">
+		<property name="providers">
+			<list>
+				<ref local="ldapAuthenticationProvider" />
+			</list>
+		</property>
+	</bean>
+
+	<bean id="ldapAuthenticationProvider"
+		class="org.springframework.security.providers.ldap.LdapAuthenticationProvider"
+		p:userDetailsContextMapper-ref="userDetailsContextMapper">
+		<constructor-arg>
+			<bean
+				class="org.springframework.security.providers.ldap.activedirectory.authenticator.ActiveDirectoryBindAuthenticator">
+				<constructor-arg>
+					<ref local="_securityContextSource" />
+				</constructor-arg>
+			</bean>
+		</constructor-arg>
+		<constructor-arg>
+			<bean
+				class="org.springframework.security.providers.ldap.activedirectory.populator.ActiveDirectoryAuthoritiesPopulator"
+				p:groupRoleAttribute="cn" p:groupSearchFilter="member={0}"
+				p:rolePrefix="" p:convertToUpperCase="false">
+				<constructor-arg>
+					<ref local="_securityContextSource" />
+				</constructor-arg>
+				<constructor-arg>
+					<value></value>
+				</constructor-arg>
+			</bean>
+		</constructor-arg>
+	</bean>
+
+	<bean id="userDetailsContextMapper"
+		class="org.springframework.security.userdetails.ldap.ReplacingUserDetailsMapper"
+		p:accountMapper-ref="accountMapper"
+		p:userDetailsService-ref="inMemoryDao">
+	</bean>
+
+	<bean id="_securityContextSource"
+		class="org.springframework.security.ldap.DefaultSpringSecurityContextSource">
+		<constructor-arg value="$Ldap{ldap.url}/$Ldap{ldap.root}" />
+		<!-- Active Directory server search fails without java.naming.referral property. -->
+		<property name="baseEnvironmentProperties">
+			<map>
+				<entry key="java.naming.referral" value="follow" />
+			</map>
+		</property>
+	</bean>
+
+	<!-- Configurer that replaces ${...} placeholders with values from properties files -->
+	<!-- (in this case, LDAP related properties) -->
+	<bean id="propertyConfigurerLdap"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"
+		p:placeholderPrefix="$Ldap{">
+		<property name="locations">
+			<list>
+				<value>
+					WEB-INF/config/security/ldap/activedirectory/ldap.properties
+				</value>
+			</list>
+		</property>
+	</bean>
+
+</beans>

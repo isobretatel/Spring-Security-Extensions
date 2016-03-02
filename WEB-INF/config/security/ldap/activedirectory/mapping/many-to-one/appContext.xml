@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="
+	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
+
+	<!-- Security configuration: ActiveDirectory + many-to-one account mapping. 
+		See readme.txt for instructions. -->
+
+	<!-- ========================= Filters/beans definitions ========================= -->
+	<import
+		resource="\security\ldap\activedirectory\filters-chain-rendering.xml" />
+	<import resource="filters.xml" />
+	<!-- ========================= Security definitions ========================= -->
+	<import resource="userdetails-service.xml" />
+	<import
+		resource="\security\ldap\activedirectory\authentication.xml" />
+	<import
+		resource="\security\ldap\activedirectory\mapping\many-to-one\account-mapper.xml" />
+</beans>
