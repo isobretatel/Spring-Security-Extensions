@@ -1,5 +1,7 @@
+This code was intended to be a contribution to the open-source framework Spring Security.
+
 # Spring-Security-Extensions
 
-Provide functionality: 
+Provides functionality: 
 - Integration with Active Directory; 
 - Integration with SSO servers.
